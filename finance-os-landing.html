@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finance OS — ДСК + Revolut в едно</title>
+<meta name="description" content="Пусни извлеченията от ДСК и Revolut. Виж пълната финансова картина за 3 минути. Еднократно €19. Без регистрация.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  /* ── Reset & Base ─────────────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #12100E;
+    --bg2:       #1A1714;
+    --bg3:       #211E1A;
+    --cream:     #EDE6D6;
+    --cream2:    #C9BFA8;
+    --muted:     #7A7060;
+    --accent:    #D4A84B;
+    --accent2:   #B8892E;
+    --green:     #3D7A5C;
+    --greenl:    #4E9972;
+    --red:       #8B3A3A;
+    --border:    rgba(237,230,214,0.10);
+    --border2:   rgba(237,230,214,0.06);
+    --serif:     'Playfair Display', Georgia, serif;
+    --sans:      'DM Sans', system-ui, sans-serif;
+    --mono:      'DM Mono', monospace;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--cream);
+    font-family: var(--sans);
+    font-weight: 300;
+    font-size: 16px;
+    line-height: 1.6;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Grain overlay ────────────────────────────────────────────────── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.35;
+  }
+
+  /* ── Animations ───────────────────────────────────────────────────── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.5; }
+  }
+  @keyframes shimmer {
+    0%   { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+  @keyframes countUp {
+    from { opacity: 0; transform: scale(0.92); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  .animate { opacity: 0; animation: fadeUp 0.7s ease forwards; }
+  .d1 { animation-delay: 0.1s; }
+  .d2 { animation-delay: 0.25s; }
+  .d3 { animation-delay: 0.4s; }
+  .d4 { animation-delay: 0.55s; }
+  .d5 { animation-delay: 0.7s; }
+  .d6 { animation-delay: 0.85s; }
+
+  /* ── Layout ───────────────────────────────────────────────────────── */
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  section { padding: 80px 0; }
+
+  hr.divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 0;
+  }
+
+  /* ── Nav ──────────────────────────────────────────────────────────── */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(18,16,14,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border2);
+    padding: 16px 24px;
+  }
+
+  nav .inner {
+    max-width: 720px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .logo {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .nav-cta {
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--bg);
+    background: var(--accent);
+    padding: 8px 18px;
+    border-radius: 2px;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.15s;
+    letter-spacing: 0.3px;
+  }
+  .nav-cta:hover { background: var(--accent2); transform: translateY(-1px); }
+
+  /* ── Hero ─────────────────────────────────────────────────────────── */
+  .hero {
+    padding: 100px 0 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -120px;
+    right: -200px;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(ellipse, rgba(212,168,75,0.07) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .hero-eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .hero-eyebrow::before {
+    content: '';
+    display: block;
+    width: 28px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  h1 {
+    font-family: var(--serif);
+    font-size: clamp(36px, 6vw, 58px);
+    font-weight: 900;
+    line-height: 1.08;
+    color: var(--cream);
+    margin-bottom: 28px;
+    letter-spacing: -0.5px;
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .hero-sub {
+    font-size: 18px;
+    color: var(--cream2);
+    line-height: 1.65;
+    max-width: 540px;
+    margin-bottom: 44px;
+    font-weight: 300;
+  }
+
+  /* ── CTA Button ───────────────────────────────────────────────────── */
+  .cta-group {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    align-items: flex-start;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--sans);
+    font-weight: 500;
+    font-size: 16px;
+    color: var(--bg);
+    background: var(--accent);
+    padding: 16px 32px;
+    border-radius: 2px;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    letter-spacing: 0.2px;
+    box-shadow: 0 4px 24px rgba(212,168,75,0.25);
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-primary::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2.5s infinite;
+  }
+  .btn-primary:hover {
+    background: var(--accent2);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(212,168,75,0.35);
+  }
+
+  .btn-arrow { font-size: 18px; }
+
+  .cta-note {
+    font-size: 13px;
+    color: var(--muted);
+    font-family: var(--mono);
+    letter-spacing: 0.5px;
+  }
+  .cta-note span { color: var(--cream2); }
+
+  /* ── The Problem ──────────────────────────────────────────────────── */
+  .problem-section { padding: 80px 0; }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 36px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .problem-text {
+    font-family: var(--serif);
+    font-size: clamp(22px, 3.5vw, 30px);
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--cream);
+    margin-bottom: 28px;
+  }
+
+  .problem-body {
+    font-size: 16px;
+    color: var(--cream2);
+    line-height: 1.8;
+    max-width: 580px;
+  }
+
+  /* ── Stats row ────────────────────────────────────────────────────── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 48px 0;
+  }
+
+  .stat {
+    background: var(--bg2);
+    padding: 28px 20px;
+    text-align: center;
+    transition: background 0.2s;
+  }
+  .stat:hover { background: var(--bg3); }
+
+  .stat-num {
+    font-family: var(--serif);
+    font-size: 36px;
+    font-weight: 900;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 8px;
+    animation: countUp 0.6s ease both;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.4;
+    font-family: var(--mono);
+    letter-spacing: 0.5px;
+  }
+
+  /* ── How it works ─────────────────────────────────────────────────── */
+  .steps { display: flex; flex-direction: column; gap: 1px; }
+
+  .step {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 0;
+    background: var(--border2);
+  }
+
+  .step-num {
+    background: var(--bg2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    border-right: 1px solid var(--border);
+    padding: 24px 0;
+    letter-spacing: 1px;
+  }
+
+  .step-content {
+    background: var(--bg2);
+    padding: 22px 24px;
+    transition: background 0.2s;
+  }
+  .step-content:hover { background: var(--bg3); }
+
+  .step-title {
+    font-weight: 500;
+    font-size: 15px;
+    color: var(--cream);
+    margin-bottom: 6px;
+  }
+
+  .step-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* ── Insight cards ────────────────────────────────────────────────── */
+  .insights { display: flex; flex-direction: column; gap: 16px; margin-top: 40px; }
+
+  .insight-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 3px;
+    padding: 20px 22px;
+    transition: border-color 0.2s, transform 0.2s;
+    cursor: default;
+  }
+  .insight-card:hover {
+    border-color: var(--accent2);
+    transform: translateX(4px);
+  }
+
+  .insight-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .insight-text {
+    font-family: var(--serif);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--cream);
+    line-height: 1.3;
+  }
+
+  .insight-text .highlight {
+    color: var(--accent);
+  }
+
+  .insight-sub {
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  /* ── Privacy block ────────────────────────────────────────────────── */
+  .privacy-block {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 40px 36px;
+    position: relative;
+    overflow: hidden;
+  }
+  .privacy-block::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--green), transparent);
+  }
+
+  .privacy-headline {
+    font-family: var(--serif);
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--cream);
+    margin-bottom: 16px;
+  }
+
+  .privacy-body {
+    font-size: 15px;
+    color: var(--cream2);
+    line-height: 1.8;
+    margin-bottom: 28px;
+  }
+
+  .privacy-checklist {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .privacy-checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 14px;
+    color: var(--cream2);
+  }
+
+  .check {
+    width: 18px;
+    height: 18px;
+    background: rgba(61,122,92,0.2);
+    border: 1px solid var(--green);
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+    font-size: 10px;
+    color: var(--greenl);
+  }
+
+  .verify-note {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+  .verify-note a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .verify-note a:hover { text-decoration: underline; }
+
+  /* ── Pricing ──────────────────────────────────────────────────────── */
+  .price-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .price-top {
+    padding: 36px 36px 28px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  .price-top::before {
+    content: 'ΤΙΜΗ СТАРТИРАНЕ';
+    position: absolute;
+    top: 20px; right: 24px;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--muted);
+  }
+
+  .price-amount {
+    font-family: var(--serif);
+    font-size: 72px;
+    font-weight: 900;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .price-desc {
+    font-size: 15px;
+    color: var(--cream2);
+    line-height: 1.6;
+  }
+
+  .price-items {
+    padding: 28px 36px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .price-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    color: var(--cream2);
+  }
+
+  .price-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .price-bottom {
+    padding: 0 36px 36px;
+  }
+
+  /* ── FAQ ──────────────────────────────────────────────────────────── */
+  .faq { display: flex; flex-direction: column; }
+
+  details {
+    border-bottom: 1px solid var(--border);
+  }
+  details:first-of-type { border-top: 1px solid var(--border); }
+
+  summary {
+    padding: 20px 0;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--cream);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    list-style: none;
+    transition: color 0.2s;
+    gap: 16px;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary:hover { color: var(--accent); }
+
+  .faq-icon {
+    font-family: var(--mono);
+    font-size: 18px;
+    color: var(--muted);
+    flex-shrink: 0;
+    transition: transform 0.3s;
+  }
+  details[open] .faq-icon { transform: rotate(45deg); color: var(--accent); }
+
+  .faq-body {
+    padding: 0 0 20px;
+    font-size: 14px;
+    color: var(--cream2);
+    line-height: 1.8;
+    max-width: 560px;
+  }
+
+  /* ── Final CTA ────────────────────────────────────────────────────── */
+  .final-section {
+    padding: 80px 0 100px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .final-section::before {
+    content: '';
+    position: absolute;
+    bottom: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(ellipse, rgba(212,168,75,0.06) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .final-headline {
+    font-family: var(--serif);
+    font-size: clamp(28px, 5vw, 44px);
+    font-weight: 900;
+    color: var(--cream);
+    line-height: 1.15;
+    margin-bottom: 20px;
+  }
+  .final-headline em { font-style: italic; color: var(--accent); }
+
+  .final-sub {
+    font-size: 16px;
+    color: var(--muted);
+    margin-bottom: 40px;
+    line-height: 1.7;
+    max-width: 440px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* ── Footer ───────────────────────────────────────────────────────── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 28px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .footer-left {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  .footer-right {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  /* ── Mobile ───────────────────────────────────────────────────────── */
+  @media (max-width: 600px) {
+    .hero { padding: 72px 0 60px; }
+    section { padding: 60px 0; }
+    .stats-row { grid-template-columns: 1fr; }
+    .price-top, .price-items, .price-bottom { padding-left: 24px; padding-right: 24px; }
+    .privacy-block { padding: 28px 24px; }
+    .cta-group { align-items: stretch; }
+    .btn-primary { justify-content: center; }
+    footer { flex-direction: column; align-items: flex-start; }
+    .price-top::before { display: none; }
+    .price-amount { font-size: 56px; }
+  }
+
+  /* ── Scroll reveal ────────────────────────────────────────────────── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+</head>
+
+<body>
+
+<!-- ── NAV ──────────────────────────────────────────────────────────── -->
+<nav>
+  <div class="inner">
+    <span class="logo">Finance OS</span>
+    <a href="https://gumroad.com" class="nav-cta" id="nav-cta-link">Купи — €19</a>
+  </div>
+</nav>
+
+<!-- ── HERO ─────────────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="container">
+    <p class="hero-eyebrow animate d1">За хора с ДСК и Revolut</p>
+
+    <h1 class="animate d2">
+      Пусни двете извлечения.<br>
+      Виж <em>цялата картина</em><br>
+      за 3 минути.
+    </h1>
+
+    <p class="hero-sub animate d3">
+      Имаш заплата в ДСК и харчиш с Revolut. Никое приложение не ти показва всичко наедно — до сега.
+      Finance OS обединява двете ти сметки в EUR, без регистрация, без абонамент, без да напуска телефона ти.
+    </p>
+
+    <div class="cta-group animate d4">
+      <a href="https://gumroad.com" class="btn-primary" id="hero-cta-link">
+        Купи сега — €19 еднократно
+        <span class="btn-arrow">→</span>
+      </a>
+      <span class="cta-note">
+        Без регистрация &nbsp;·&nbsp; Без абонамент &nbsp;·&nbsp; <span>Без сървър</span>
+      </span>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ── STATS ────────────────────────────────────────────────────────── -->
+<section class="problem-section">
+  <div class="container">
+    <p class="section-label animate d1">Проблемът</p>
+
+    <p class="problem-text animate d2">
+      Отваряш две приложения. Виждаш две числа.<br>
+      Пак не знаеш накъде отиват парите ти.
+    </p>
+
+    <p class="problem-body animate d3">
+      520 000 българи държат сметки едновременно в ДСК и Revolut. ДСК е за заплата, наем и комунални. Revolut — за ежедневни покупки, храна, Glovo. Двете приложения не се виждат едно друго. Резултатът: отваряш и двете, правиш смятки наум, и пак не си сигурен.
+    </p>
+
+    <div class="stats-row reveal">
+      <div class="stat">
+        <div class="stat-num">520к</div>
+        <div class="stat-label">българи с и двете<br>банки едновременно</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">1 от 10</div>
+        <div class="stat-label">реално следи<br>всичките си разходи</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">€0</div>
+        <div class="stat-label">твои данни по<br>наши сървъри</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ── HOW IT WORKS ──────────────────────────────────────────────────── -->
+<section>
+  <div class="container">
+    <p class="section-label reveal">Как работи</p>
+
+    <div class="steps reveal">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-content">
+          <p class="step-title">Изтегли извлечението от ДСК Direct</p>
+          <p class="step-desc">CSV или Excel файл от ДСК Директ. Онлайн банкиране → Сметки → Движения → Изтегли. Отнема 30 секунди.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-content">
+          <p class="step-title">Изтегли историята от Revolut</p>
+          <p class="step-desc">CSV от приложението: Сметка → Извлечение. Поддържат се всички варианти на Revolut износ.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-content">
+          <p class="step-title">Пусни двата файла в Finance OS</p>
+          <p class="step-desc">Отваряш HTML файла в браузъра на телефона. Пускаш двата файла. Всичко се обработва на устройството ти — нищо не напуска телефона.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <div class="step-content">
+          <p class="step-title">Виждаш цялата картина</p>
+          <p class="step-desc">Обединени разходи по категории. Кръстосан анализ между двете карти. Всичко в EUR. За около 3 минути.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Insight cards -->
+    <div class="insights reveal">
+      <p class="section-label" style="margin-top: 48px;">Какво виждаш след 3 минути</p>
+
+      <div class="insight-card">
+        <p class="insight-label">Общ преглед</p>
+        <p class="insight-text">Изминалите 3 месеца: <span class="highlight">€4,280</span> от двете сметки — ето накъде са отишли.</p>
+        <p class="insight-sub">Автоматично обединени ДСК + Revolut транзакции</p>
+      </div>
+
+      <div class="insight-card">
+        <p class="insight-label">Кръстосан анализ</p>
+        <p class="insight-text">Тази година си харчил <span class="highlight">€340</span> за ресторанти и доставка от и двете карти.</p>
+        <p class="insight-sub">Това нито ДСК Директ, нито Revolut може да ти покаже поотделно</p>
+      </div>
+
+      <div class="insight-card">
+        <p class="insight-label">Категоризация</p>
+        <p class="insight-text">Kaufland, Lidl, ЧЕЗ, Bolt, A1 — разпознати автоматично на <span class="highlight">български</span>.</p>
+        <p class="insight-sub">200+ български търговци в базата, без интернет след първото зареждане</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ── PRIVACY ───────────────────────────────────────────────────────── -->
+<section>
+  <div class="container">
+    <p class="section-label reveal">Поверителност</p>
+
+    <div class="privacy-block reveal">
+      <h2 class="privacy-headline">Банковите ти извлечения никога не напускат телефона ти.</h2>
+      <p class="privacy-body">
+        Finance OS е един HTML файл. Работи изцяло в браузъра. Не изпраща нищо никъде. Няма сървър, няма облак, няма регистрация — защото не е нужна. Никоя компания не знае, че съществуваш.
+      </p>
+
+      <ul class="privacy-checklist">
+        <li>
+          <span class="check">✓</span>
+          Всички изчисления стават на устройството ти — не в облак
+        </li>
+        <li>
+          <span class="check">✓</span>
+          Не изпращаме никакви данни на никакви сървъри
+        </li>
+        <li>
+          <span class="check">✓</span>
+          Без регистрация, без имейл, без парола — без нищо
+        </li>
+        <li>
+          <span class="check">✓</span>
+          Без OpenAI, без AWS, без американски облак
+        </li>
+        <li>
+          <span class="check">✓</span>
+          Работи офлайн след първото зареждане
+        </li>
+        <li>
+          <span class="check">✓</span>
+          Изходният код е публичен в GitHub — можеш да го провериш сам
+        </li>
+      </ul>
+
+      <p class="verify-note">
+        Скептичен? Отвори DevTools → Network след като пуснеш извлечението. Ще видиш нула изходящи заявки с финансови данни. <a href="https://github.com" id="github-link">Виж кода в GitHub →</a>
+      </p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ── PRICING ───────────────────────────────────────────────────────── -->
+<section>
+  <div class="container">
+    <p class="section-label reveal">Цена</p>
+
+    <div class="price-card reveal">
+      <div class="price-top">
+        <div class="price-amount">€19</div>
+        <p class="price-desc">Еднократно плащане. Не е абонамент. Не е месечна такса.<br>Плащаш веднъж и го ползваш завинаги.</p>
+      </div>
+      <div class="price-items">
+        <div class="price-item">
+          <span class="price-dot"></span>
+          Поддръжка на ДСК CSV и Excel износ (всички варианти)
+        </div>
+        <div class="price-item">
+          <span class="price-dot"></span>
+          Поддръжка на Revolut CSV (приложение и уеб)
+        </div>
+        <div class="price-item">
+          <span class="price-dot"></span>
+          200+ български търговци — автоматична категоризация
+        </div>
+        <div class="price-item">
+          <span class="price-dot"></span>
+          Работи на телефон, таблет и компютър
+        </div>
+        <div class="price-item">
+          <span class="price-dot"></span>
+          Всяка бъдеща актуализация на парсера — безплатно завинаги
+        </div>
+        <div class="price-item">
+          <span class="price-dot"></span>
+          Изходен код публично достъпен в GitHub
+        </div>
+      </div>
+      <div class="price-bottom">
+        <a href="https://gumroad.com" class="btn-primary" id="price-cta-link" style="width:100%; justify-content:center;">
+          Купи Finance OS — €19
+          <span class="btn-arrow">→</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ── FAQ ──────────────────────────────────────────────────────────── -->
+<section>
+  <div class="container">
+    <p class="section-label reveal">Въпроси</p>
+
+    <div class="faq reveal">
+
+      <details>
+        <summary>
+          Работи ли с моя тип ДСК сметка?
+          <span class="faq-icon">+</span>
+        </summary>
+        <p class="faq-body">
+          Да. Finance OS поддържа ДСК разплащателна сметка, спестовна сметка и кредитна карта — всичко от CSV или Excel износ от ДСК Директ. Трябва да изтеглиш извлечение от януари 2026 нататък (евро период).
+        </p>
+      </details>
+
+      <details>
+        <summary>
+          Само за евро ли е? Имам стари транзакции в лева.
+          <span class="faq-icon">+</span>
+        </summary>
+        <p class="faq-body">
+          Finance OS е проектиран за евро периода — от януари 2026 насам. Старите транзакции в лева не се поддържат, защото двете валути правят обединения анализ сложен. Ако искаш да запазиш историята си в лева, изтегли я от ДСК Директ и Revolut в Excel за лична справка.
+        </p>
+      </details>
+
+      <details>
+        <summary>
+          Как точно се категоризират транзакциите?
+          <span class="faq-icon">+</span>
+        </summary>
+        <p class="faq-body">
+          Три слоя: първо бърза проверка срещу 200+ познати български търговци (Kaufland, OMV, ЧЕЗ, Bolt и др.) — мигновено и 100% точно. После вграден езиков модел за непознати търговци. Накрая ти можеш ръчно да коригираш — и корекцията се запомня за следващия път.
+        </p>
+      </details>
+
+      <details>
+        <summary>
+          Безопасно ли е да пускам банкови извлечения?
+          <span class="faq-icon">+</span>
+        </summary>
+        <p class="faq-body">
+          Finance OS работи изцяло в браузъра на устройството ти. Файловете не напускат телефона — никъде не се изпращат. Кодът е публичен в GitHub. Можеш да отвориш DevTools и да провериш, че няма изходящи заявки с финансови данни. Ако не ти е достатъчно — изобщо не го купувай.
+        </p>
+      </details>
+
+      <details>
+        <summary>
+          Кога ще е готово?
+          <span class="faq-icon">+</span>
+        </summary>
+        <p class="faq-body">
+          Купуваш предварително и получаваш достъп веднага щом продуктът е готов. Ранните купувачи получават цената €19 — след пускането цената минава на €29.
+        </p>
+      </details>
+
+      <details>
+        <summary>
+          Мога ли да получа възстановяване?
+          <span class="faq-icon">+</span>
+        </summary>
+        <p class="faq-body">
+          Ако продуктът не работи с твоите реални извлечения, връщаме парите без въпроси. Свържи се с нас в рамките на 14 дни след получаване.
+        </p>
+      </details>
+
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ── FINAL CTA ─────────────────────────────────────────────────────── -->
+<section class="final-section">
+  <div class="container">
+    <h2 class="final-headline reveal">
+      Спри да се чудиш<br>
+      <em>накъде отиват парите.</em>
+    </h2>
+    <p class="final-sub reveal">
+      3 минути. Двете ти банки. Пълната картина.<br>Веднъж €19, без абонамент, без регистрация.
+    </p>
+    <div class="reveal" style="display:flex; flex-direction:column; align-items:center; gap:12px;">
+      <a href="https://gumroad.com" class="btn-primary" id="final-cta-link">
+        Купи Finance OS — €19 еднократно
+        <span class="btn-arrow">→</span>
+      </a>
+      <span class="cta-note">Gumroad · Сигурно плащане · 14-дневен рефунд</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ────────────────────────────────────────────────────────── -->
+<footer>
+  <span class="footer-left">FINANCE OS © 2026</span>
+  <span class="footer-right">Направено в България &nbsp;·&nbsp; Без американски облак</span>
+</footer>
+
+<script>
+  // ── Scroll reveal ────────────────────────────────────────────────────
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => {
+          entry.target.classList.add('visible');
+        }, i * 60);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+  reveals.forEach(el => observer.observe(el));
+
+  // ── CTA click tracking (replace with your analytics event) ──────────
+  const ctaLinks = document.querySelectorAll('[id$="-cta-link"]');
+  ctaLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+      // Replace 'YOUR_GUMROAD_URL' with actual Gumroad product URL
+      // e.g. https://yourname.gumroad.com/l/finance-os
+      const GUMROAD_URL = 'https://gumroad.com/l/finance-os';
+      link.href = GUMROAD_URL;
+
+      // Optional: fire analytics event here
+      // plausible('purchase_click', { props: { source: link.id } });
+    });
+  });
+
+  // ── Stat counter animation ───────────────────────────────────────────
+  const statNums = document.querySelectorAll('.stat-num');
+  const statObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.animation = 'countUp 0.5s ease both';
+        statObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.5 });
+  statNums.forEach(el => statObserver.observe(el));
+</script>
+
+</body>
+</html>
